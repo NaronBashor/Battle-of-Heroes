@@ -13,7 +13,7 @@ public class Spawner : MonoBehaviour
     {
         ResetSortingOrderCounter();
         //TrySpawnPlayerCharacter();
-        //TrySpawnEnemyCharacter();
+        TrySpawnEnemyCharacter();
     }
 
     public void TrySpawnPlayerCharacter(string characterName)

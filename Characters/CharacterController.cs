@@ -1,21 +1,25 @@
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using static CharacterData;
 
 public class CharacterController : MonoBehaviour
 {
+    private MeleeDamage meleeDamage;
     public CharacterData characterData; // Assigned at runtime
     public Vector3 attackSpawnPoint; // Point where projectiles spawn (if ranged)
-    private IAttackBehavior attackBehavior;
+    private RangedAttackBehavior rangedAttack;
     public float moveSpeedModifier;
     public float characterDetectDistance;
     public LayerMask enemyLayerMask;
+    public LayerMask barracksLayerMask;
     private Animator animator;
-    private int currentHealth;
+    public int currentHealth;
     private BoxCollider2D boxCollider;
     private SpriteRenderer spriteRenderer;
     private Rigidbody2D rb;
     private float attackCooldownTimer = 0;
+    private GameObject targetGameObject;
 
     private bool shouldMove = true; // Controls whether the character is moving
 
@@ -25,28 +29,28 @@ public class CharacterController : MonoBehaviour
         boxCollider = GetComponent<BoxCollider2D>();
         animator = GetComponent<Animator>();
         rb = GetComponent<Rigidbody2D>();
+        rangedAttack = GetComponentInChildren<RangedAttackBehavior>();
 
         if (characterData.isPlayerCharacter) {
-            gameObject.layer = LayerMask.NameToLayer("Player"); // Change layer to "Player"
+            gameObject.layer = LayerMask.NameToLayer("Player");
             ToggleLayerMask("Player");
-            //Debug.Log("Layer is now: " + gameObject.layer); // Should log 6 for "Player"
             transform.localScale = new Vector3(-1, 1, 1);
         } else {
-            gameObject.layer = LayerMask.NameToLayer("Enemy"); // Change layer to "Enemy"
+            gameObject.layer = LayerMask.NameToLayer("Enemy");
             ToggleLayerMask("Enemy");
-            //Debug.Log("Layer is now: " + gameObject.layer); // Should log 7 for "Enemy"
         }
 
         if (characterData != null) {
             InitializeCharacter();
         }
 
-        // Initialize attack behavior based on CharacterData
-        if (characterData.attackType == AttackType.Melee) {
-            GetComponentInChildren<MeleeDamage>().targetLayers = enemyLayerMask;
-            attackBehavior = new MeleeAttackBehavior(animator, characterData.damage);
+        // Initialize attack behavior
+        meleeDamage = GetComponentInChildren<MeleeDamage>();
+        if (characterData.attackType == AttackType.Melee && meleeDamage != null) {
+            meleeDamage.targetLayers = enemyLayerMask | barracksLayerMask; // Include barracks
+            meleeDamage.damage = characterData.damage;
         } else if (characterData.attackType == AttackType.Ranged) {
-            attackBehavior = new RangedAttackBehavior(
+            rangedAttack.RangedAttackInfo(
                 characterData.characterName,
                 animator,
                 characterData.projectilePrefab,
@@ -54,7 +58,7 @@ public class CharacterController : MonoBehaviour
                 characterData.projectileSpawnOffset,
                 characterData.damage,
                 this.gameObject,
-                enemyLayerMask
+                enemyLayerMask | barracksLayerMask // Include barracks
             );
         }
 
@@ -65,26 +69,29 @@ public class CharacterController : MonoBehaviour
     {
         attackCooldownTimer -= Time.deltaTime;
 
-        // Example: Detect enemy and attack
-        if (IsEnemyInRange() && attackCooldownTimer <= 0) {
-            //Vector2 targetPosition = GetEnemyPosition(); // Replace with actual target detection
-            attackBehavior.Attack(attackSpawnPoint);
+        if (attackCooldownTimer <= 0 && IsEnemyInRange()) {
+            //attackBehavior.Attack(attackSpawnPoint, characterData.damage);
+            if (characterData.attackType == AttackType.Ranged) {
+                rangedAttack.Attack(attackSpawnPoint, characterData.damage);
+            } else {
+                animator.SetTrigger("Attack");
+            }
             attackCooldownTimer = characterData.attackCooldown; // Reset cooldown
         }
 
         if (characterData.isPlayerCharacter) {
-            shouldMove = !DetectEnemyCharacter(); // Stop moving if an enemy is detected
+            shouldMove = !DetectEnemyCharacter() && !DetectBarracks();
         } else {
-            shouldMove = !DetectPlayerCharacter(); // Stop moving if a player is detected
+            shouldMove = !DetectPlayerCharacter() && !DetectBarracks();
         }
     }
 
     private bool IsEnemyInRange()
     {
         if (characterData.isPlayerCharacter) {
-            return DetectEnemyCharacter();
+            return DetectEnemyCharacter() || DetectBarracks(); // Check for barracks as well
         } else {
-            return DetectPlayerCharacter();
+            return DetectPlayerCharacter() || DetectBarracks(); // Check for barracks as well
         }
     }
 
@@ -199,6 +206,7 @@ public class CharacterController : MonoBehaviour
     {
         RaycastHit2D hit = Physics2D.Raycast(transform.position, Vector2.right, characterData.attackRange, enemyLayerMask);
         if (hit) {
+            targetGameObject = hit.collider.gameObject;
             attackSpawnPoint = hit.collider.GetComponent<Transform>().position;
             Debug.DrawRay(transform.position, Vector2.right * characterData.attackRange, Color.green);
             return true;
@@ -209,10 +217,17 @@ public class CharacterController : MonoBehaviour
         }
     }
 
+    public GameObject GetTargetGameObject()
+    {
+        if (targetGameObject == null) { Debug.LogWarning("No target game object assigned."); return null; }
+        return targetGameObject;
+    }
+
     private bool DetectPlayerCharacter()
     {
         RaycastHit2D hit = Physics2D.Raycast(transform.position, Vector2.left, characterData.attackRange, enemyLayerMask);
         if (hit) {
+            targetGameObject = hit.collider.gameObject;
             attackSpawnPoint = hit.collider.GetComponent<Transform>().position;
             Debug.DrawRay(transform.position, Vector2.left * characterData.attackRange, Color.green);
             return true;
@@ -223,20 +238,29 @@ public class CharacterController : MonoBehaviour
         }
     }
 
+    private bool DetectBarracks()
+    {
+        RaycastHit2D hit = Physics2D.Raycast(transform.position, characterData.isPlayerCharacter ? Vector2.right : Vector2.left, characterData.attackRange, barracksLayerMask);
+        if (hit) {
+            targetGameObject = hit.collider.gameObject;
+            attackSpawnPoint = hit.collider.GetComponent<Transform>().position;
+            Debug.DrawRay(transform.position, (characterData.isPlayerCharacter ? Vector2.right : Vector2.left) * characterData.attackRange, Color.blue);
+            return true;
+        }
+        return false;
+    }
+
     private void ToggleLayerMask(string layerType)
     {
         if (layerType == "Player") {
-            // Set the enemyLayerMask to exclude Player-related layers
             enemyLayerMask = LayerMask.GetMask("Enemy");
+            barracksLayerMask = LayerMask.GetMask("Barracks");
         } else if (layerType == "Enemy") {
-            // Set the enemyLayerMask to exclude Enemy-related layers
             enemyLayerMask = LayerMask.GetMask("Player");
+            barracksLayerMask = LayerMask.GetMask("Barracks");
         } else {
             Debug.LogError("Invalid layer type provided to ToggleLayerMask");
         }
-
-        // Debug the new mask
-        //Debug.Log("New enemyLayerMask value: " + enemyLayerMask.value);
     }
 
     public void TakeDamage(int damage)

@@ -8,13 +8,15 @@ public class ProjectileController : MonoBehaviour
     private int damage;
     private bool flipX;
     private LayerMask layerMask;
+    private GameObject projectileOwner;
 
-    public void Initialize(Vector2 targetPosition, int damage, bool flip, LayerMask layer)
+    public void Initialize(Vector2 targetPosition, int damage, bool flip, LayerMask layer, GameObject projectileOwner)
     {
         this.targetPosition = targetPosition;
         this.damage = damage;
         this.flipX = flip;
         this.layerMask = layer;
+        this.projectileOwner = projectileOwner;
         if (!canMove) { return; }
         RotateTowardsTarget();
     }
@@ -28,6 +30,7 @@ public class ProjectileController : MonoBehaviour
 
         // Destroy if it reaches the target
         if (Vector2.Distance(transform.position, targetPosition) < 0.01f) {
+            ApplyDamage();
             Destroy(gameObject);
         }
     }
@@ -44,12 +47,20 @@ public class ProjectileController : MonoBehaviour
         transform.rotation = Quaternion.Euler(0, 0, angle);
     }
 
-    private void OnTriggerEnter2D(Collider2D collision)
+    private void ApplyDamage()
     {
-        // Check if the collided object is on the target LayerMask
-        if (((1 << collision.gameObject.layer) & layerMask) != 0) {
-            collision.GetComponent<CharacterController>().TakeDamage(damage);
-            Debug.Log($"{gameObject.name} dealt {damage} damage to {collision.gameObject.name} on layer {layerMask.value}");
+        GameObject targetObject = projectileOwner.GetComponent<CharacterController>().GetTargetGameObject();
+        // Check if the target is on the correct LayerMask and hasn't been damaged yet
+        // Apply damage based on the target type
+        if (targetObject.layer == LayerMask.NameToLayer("Barracks")) {
+            targetObject.GetComponent<BarracksController>()?.TakeDamage(damage);
+        } else {
+            targetObject.GetComponent<CharacterController>()?.TakeDamage(damage);
         }
+
+        // Debug log (optional)
+#if UNITY_EDITOR
+        //Debug.Log($"Dealt {damage} damage to {targetObject.name} on layer {targetObject.layer}");
+#endif
     }
 }
