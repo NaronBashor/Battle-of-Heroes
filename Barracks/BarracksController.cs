@@ -1,18 +1,27 @@
 using UnityEngine;
+using UnityEngine.UI;
 
 public class BarracksController : MonoBehaviour
 {
-    public BarracksData barracksData; // Reference to the ScriptableObject
-    public GameObject playerBarracks; // Renderer for displaying sprites
-    public int barrackIndex = 0; // Index of the current barracks in the list
+    [Header("UI Elements")]
+    [SerializeField] private Image fillImage;
 
-    private int currentUpgradeLevel = 0; // Current upgrade level
-    private int currentDamageState = 0; // Current damage state
-    public int health;
-    private int startingHealth;
+    [Header("Barracks Data")]
+    [SerializeField] private BarracksData barracksData; // Reference to the ScriptableObject
+    [SerializeField] private GameObject playerBarracks; // Renderer for displaying sprites
+    [SerializeField] private int barrackIndex = 0; // Index of the current barracks in the list
 
-    private bool isPlayerBarracks = false;
-    private bool isEnemyBarracks = false;
+    [Header("Health Settings")]
+    [SerializeField] private int health;
+    [SerializeField] private int startingHealth;
+    [SerializeField] private int currentDamageState = 0; // Current damage state
+
+    [Header("Upgrade Settings")]
+    [SerializeField] private int currentUpgradeLevel = 0; // Current upgrade level
+
+    [Header("Ownership Settings")]
+    [SerializeField] private bool isPlayerBarracks = false;
+    [SerializeField] private bool isEnemyBarracks = false;
 
     private void Start()
     {
@@ -39,12 +48,15 @@ public class BarracksController : MonoBehaviour
         UpdateSprite(); // Display the initial sprite
 
         startingHealth = health;
+        fillImage.fillAmount = health / startingHealth;
     }
 
     public void TakeDamage(int damage)
     {
         // Reduce current health by the damage amount
         health -= damage;
+        fillImage.fillAmount = (float)health / startingHealth;
+        //Debug.Log($"{gameObject.tag} barracks took {damage} damage and health is now {health} out of {startingHealth}.");
 
         // Calculate health percentage remaining
         float healthPercentage = (float)health / startingHealth;
@@ -66,6 +78,7 @@ public class BarracksController : MonoBehaviour
             if (isPlayerBarracks) {
                 Debug.Log("Game Over.");
             } else if (isEnemyBarracks) {
+                Debug.Log("Player wins!");
                 LevelManager.Instance.CompleteLevel();
             }
         }

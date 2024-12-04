@@ -14,24 +14,33 @@ public class PartyScreenController : MonoBehaviour
         public Sprite characterImage;      // Reference to the button's image (sprite)
     }
 
-    public CharacterDatabase playerDatabase;
-    public Image playerSprite;
-    public TextMeshProUGUI characterNameText;
-    public TextMeshProUGUI characterLevelText;
-    public TextMeshProUGUI healthText;
-    public TextMeshProUGUI attackTypeText;
-    public TextMeshProUGUI damageText;
-    public TextMeshProUGUI attackSpeedText;
-    public TextMeshProUGUI moveSpeedText;
-    private string characterName;
+    [Header("Player Data")]
+    [SerializeField] private CharacterDatabase playerDatabase;
 
-    public GameObject levelUpPanel;
-    public List<PartyButton> partyButtons; // List of inventory buttons (right side)
-    public List<Button> partySlots;       // References to the party slot buttons (left side)
-    public Sprite emptySlotSprite;        // Sprite for an empty slot
-    public int maxPartySize = 6;          // Maximum number of characters in the party
+    [Header("UI Components")]
+    [SerializeField] private Image playerSprite;
+    [SerializeField] private TextMeshProUGUI characterNameText;
+    [SerializeField] private TextMeshProUGUI characterLevelText;
+    [SerializeField] private TextMeshProUGUI healthText;
+    [SerializeField] private TextMeshProUGUI attackTypeText;
+    [SerializeField] private TextMeshProUGUI damageText;
+    [SerializeField] private TextMeshProUGUI attackSpeedText;
+    [SerializeField] private TextMeshProUGUI moveSpeedText;
 
-    private List<(string characterName, Sprite characterSprite)> selectedParty = new List<(string, Sprite)>(); // Tracks selected party members
+    [Header("Character Details")]
+    [SerializeField] private string characterName;
+
+    [Header("Level Up Panel")]
+    [SerializeField] private GameObject levelUpPanel;
+
+    [Header("Party Management")]
+    [SerializeField] private List<PartyButton> partyButtons; // List of inventory buttons (right side)
+    [SerializeField] private List<Button> partySlots; // References to the party slot buttons (left side)
+    [SerializeField] private Sprite emptySlotSprite; // Sprite for an empty slot
+    [SerializeField] private int maxPartySize = 6; // Maximum number of characters in the party
+
+    [Header("Selected Party")]
+    [SerializeField] private List<(string characterName, Sprite characterSprite)> selectedParty = new List<(string, Sprite)>(); // Tracks selected party members
 
     private void Start()
     {
@@ -218,7 +227,7 @@ public class PartyScreenController : MonoBehaviour
         }
 
         SaveManager.Instance.SaveGame(); // Save the updated game data
-        //Debug.Log("Party saved!");
+        Debug.Log("Party saved!");
     }
 
     public void OnDisable()

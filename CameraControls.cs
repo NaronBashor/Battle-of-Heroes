@@ -3,13 +3,21 @@ using UnityEngine.UI;
 
 public class CameraControls : MonoBehaviour
 {
+    [Header("Camera Settings")]
     [SerializeField] private Camera cam;
+
+    [Header("Bounds Settings")]
     [SerializeField] private Vector2 maxBounds; // Maximum X and Y bounds
     [SerializeField] private Vector2 minBounds; // Minimum X and Y bounds
+
+    [Header("Panning Settings")]
     [SerializeField] private float panSpeed = 10f; // Speed of panning
+
+    [Header("UI Components")]
     [SerializeField] private GameObject returnToPlayerBarracksButton;
 
-    private Vector3 dragOrigin; // To store the mouse position when starting to drag
+    [Header("Drag State")]
+    [SerializeField] private Vector3 dragOrigin;
 
     private void Awake()
     {

@@ -5,20 +5,31 @@ using UnityEngine.UI;
 
 public class BarracksUpgradeController : MonoBehaviour
 {
-    public GameObject upgradeBarracksPanel;
-    public TextMeshProUGUI maxLevelText;
-    public TextMeshProUGUI costText;
-    public TextMeshProUGUI currentHpText;
-    public TextMeshProUGUI nextLevelHpText;
-    public BarracksData barracksData; // Reference to the ScriptableObject
-    public Button barracksLevelUpButton;  // The button component
-    public Button openBarracksPanelButton;
-    public Button closeBarracksPanelButton;
-    public Image arrowImage;
-    public Image barracksImage;
-    public Image currentBarracksLevelImage;
-    public Image nextLevelBarracksImage;
-    public int level;
+    [Header("UI Panel Elements")]
+    [SerializeField] private GameObject upgradeBarracksPanel;
+
+    [Header("Text Elements")]
+    [SerializeField] private TextMeshProUGUI maxLevelText;
+    [SerializeField] private TextMeshProUGUI costText;
+    [SerializeField] private TextMeshProUGUI currentHpText;
+    [SerializeField] private TextMeshProUGUI nextLevelHpText;
+
+    [Header("Barracks Data")]
+    [SerializeField] private BarracksData barracksData; // Reference to the ScriptableObject
+
+    [Header("Buttons")]
+    [SerializeField] private Button barracksLevelUpButton;
+    [SerializeField] private Button openBarracksPanelButton;
+    [SerializeField] private Button closeBarracksPanelButton;
+
+    [Header("Images")]
+    [SerializeField] private Image arrowImage;
+    [SerializeField] private Image barracksImage;
+    [SerializeField] private Image currentBarracksLevelImage;
+    [SerializeField] private Image nextLevelBarracksImage;
+
+    [Header("Barracks Level")]
+    [SerializeField] private int level;
 
     private void Awake()
     {
@@ -30,7 +41,7 @@ public class BarracksUpgradeController : MonoBehaviour
 
     private void Start()
     {
-        SaveManager.Instance.gameData.coinTotal = 100000; // REMOVE
+        //SaveManager.Instance.gameData.coinTotal = 100000; // REMOVE
 
         InitUnlockButton();
         level = SaveManager.Instance.gameData.barracksUpgradeIndex;

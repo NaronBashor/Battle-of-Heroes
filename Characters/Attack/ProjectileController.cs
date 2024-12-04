@@ -2,13 +2,22 @@ using UnityEngine;
 
 public class ProjectileController : MonoBehaviour
 {
-    public float speed; // Speed of the projectile
-    public bool canMove = false;
-    private Vector2 targetPosition;
-    private int damage;
-    private bool flipX;
-    private LayerMask layerMask;
-    private GameObject projectileOwner;
+    [Header("Movement Settings")]
+    [SerializeField] private float speed; // Speed of the projectile
+    [SerializeField] private bool canMove = false;
+    [SerializeField] private Vector2 targetPosition;
+
+    [Header("Damage Settings")]
+    [SerializeField] private int damage;
+
+    [Header("Appearance Settings")]
+    [SerializeField] private bool flipX;
+
+    [Header("Target Settings")]
+    [SerializeField] private LayerMask layerMask;
+
+    [Header("Ownership Settings")]
+    [SerializeField] private GameObject projectileOwner;
 
     public void Initialize(Vector2 targetPosition, int damage, bool flip, LayerMask layer, GameObject projectileOwner)
     {

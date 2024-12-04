@@ -21,7 +21,9 @@ public class CharacterData : ScriptableObject
     public int damage;
     public float speed;
     public int armor;
-    public int cost;
+    public int purchaseCost;
+    public int spawnCost;
+    public float spawnCooldown;
     public float yOffset;
 
     [Header("Attack Stats")]

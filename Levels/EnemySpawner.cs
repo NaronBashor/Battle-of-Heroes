@@ -3,14 +3,20 @@ using UnityEngine;
 
 public class EnemySpawner : MonoBehaviour
 {
-    public float spawnInterval; // Time between spawns
-    public int maxEnemiesPerWave; // Number of enemies per wave
+    [Header("Spawn Settings")]
+    [SerializeField] private float spawnInterval; // Time between spawns
+    [SerializeField] private int maxEnemiesPerWave; // Number of enemies per wave
 
-    private int enemiesSpawned = 0;
-    private bool spawning = false;
+    [Header("Spawning State")]
+    [SerializeField] private int enemiesSpawned = 0;
+    [SerializeField] private bool spawning = false;
 
-    public LevelData currentLevel;
-    LevelDifficulty currentDifficulty;
+    [Header("Level Data")]
+    [SerializeField] private LevelData currentLevel;
+    [SerializeField] private LevelDifficulty currentDifficulty;
+
+    [Header("Coroutine")]
+    [SerializeField] private Coroutine spawnCoroutine;
 
     private void Start()
     {
@@ -26,14 +32,19 @@ public class EnemySpawner : MonoBehaviour
     {
         if (!spawning) {
             spawning = true;
-            StartCoroutine(SpawnEnemies());
+            spawnCoroutine = StartCoroutine(SpawnEnemies());
         }
     }
 
     public void StopSpawning()
     {
-        spawning = false;
-        StopCoroutine(SpawnEnemies());
+        if (spawning) {
+            spawning = false;
+            if (spawnCoroutine != null) {
+                StopCoroutine(spawnCoroutine); // Stop the specific coroutine
+                spawnCoroutine = null;
+            }
+        }
     }
 
     private IEnumerator SpawnEnemies()
@@ -48,9 +59,13 @@ public class EnemySpawner : MonoBehaviour
 
                 // Wait for the interval before spawning the next enemy
                 yield return new WaitForSeconds(spawnInterval);
+            } else {
+                StopSpawning();
+                break; // Prevent infinite loop
             }
         }
     }
+
 
 
     private void SpawnEnemy()

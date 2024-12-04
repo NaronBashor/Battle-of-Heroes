@@ -2,12 +2,19 @@ using UnityEngine;
 
 public class Spawner : MonoBehaviour
 {
-    public CharacterDatabase playerDatabase;
-    public CharacterDatabase enemyDatabase;
-    public GameObject characterPrefab;
-    public Transform playerSpawnPoint;
-    public Transform enemySpawnPoint;
-    private int sortingOrderCounter = 0;
+    [Header("Character Databases")]
+    [SerializeField] public CharacterDatabase playerDatabase;
+    [SerializeField] private CharacterDatabase enemyDatabase;
+
+    [Header("Character Prefabs")]
+    [SerializeField] private GameObject characterPrefab;
+
+    [Header("Spawn Points")]
+    [SerializeField] private Transform playerSpawnPoint;
+    [SerializeField] private Transform enemySpawnPoint;
+
+    [Header("Sorting Settings")]
+    [SerializeField] private int sortingOrderCounter = 0;
 
     private void Start()
     {
@@ -35,7 +42,8 @@ public class Spawner : MonoBehaviour
     public void TrySpawnEnemyCharacter(int maxEnemyIndex)
     {
         // Get the pool of enemies for the current level and difficulty
-        CharacterData[] enemyPool = GameManager.Instance.GetEnemyPool(GameManager.Instance.currentLevel.levelIndex);
+        int index = GameManager.Instance.currentLevel.levelIndex + 1;
+        CharacterData[] enemyPool = GameManager.Instance.GetEnemyPool(index);
 
         // Select a random enemy from the pool
         int randomIndex = Random.Range(0, enemyPool.Length); // Ensure within the pool size

@@ -4,8 +4,11 @@ using UnityEngine;
 [CreateAssetMenu(fileName = "BarracksData", menuName = "Game/Barracks Data")]
 public class BarracksData : ScriptableObject
 {
-    public string baseName; // Name of the base (optional)
-    public List<Barracks> barracks = new List<Barracks>();
+    [Header("Base Settings")]
+    [SerializeField] private string baseName; // Name of the base (optional)
+
+    [Header("Barracks List")]
+    [SerializeField] public List<Barracks> barracks = new List<Barracks>();
 
     public Sprite GetUpgradeSprite(int barrackIndex, int upgradeLevel)
     {

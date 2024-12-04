@@ -1,23 +1,31 @@
+using TMPro;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 public class OptionsManager : MonoBehaviour
 {
+    [Header("Audio Settings")]
     [SerializeField] private Toggle musicToggle;
     [SerializeField] private Slider volumeSlider;
 
+    [Header("Options Panel")]
+    [SerializeField] private GameObject optionsPanel;
     [SerializeField] private Button openOptionsPanelButton;
     [SerializeField] private Button closeOptionsPanelButton;
 
+    [Header("Menu Buttons")]
     [SerializeField] private Button mainMenuButton;
     [SerializeField] private Button creditsButton;
     [SerializeField] private Button moreGamesButton;
     [SerializeField] private Button exitButton;
 
-    [SerializeField] private GameObject optionsPanel;
+    [Header("Sprites")]
     [SerializeField] private Sprite activeSprite;
     [SerializeField] private Sprite inactiveSprite;
+
+    [Header("UI Text")]
+    [SerializeField] private TextMeshProUGUI currentCoinCountText;
 
     private void Awake()
     {
@@ -62,6 +70,11 @@ public class OptionsManager : MonoBehaviour
         // Add listeners for changes
         musicToggle.onValueChanged.AddListener(OnMusicToggleChanged);
         volumeSlider.onValueChanged.AddListener(OnVolumeSliderChanged);
+    }
+
+    private void Update()
+    {
+        currentCoinCountText.text = SaveManager.Instance.gameData.coinTotal.ToString();
     }
 
     public bool IsOptionsPanelOpen()

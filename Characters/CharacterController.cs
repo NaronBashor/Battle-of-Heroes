@@ -1,30 +1,53 @@
+using System;
 using System.Collections.Generic;
+using Unity.Collections;
 using UnityEngine;
 using UnityEngine.UI;
 using static CharacterData;
 
 public class CharacterController : MonoBehaviour
 {
-    private MeleeDamage meleeDamage;
-    public CharacterData characterData; // Assigned at runtime
-    public Vector3 attackSpawnPoint; // Point where projectiles spawn (if ranged)
-    private RangedAttackBehavior rangedAttack;
-    public float moveSpeedModifier;
-    public float characterDetectDistance;
-    public LayerMask enemyLayerMask;
-    public LayerMask barracksLayerMask;
-    private Animator animator;
-    public int currentHealth;
-    private BoxCollider2D boxCollider;
-    private SpriteRenderer spriteRenderer;
-    private Rigidbody2D rb;
-    private float attackCooldownTimer = 0;
-    private GameObject targetGameObject;
+    [Header("Character Stats")]
+    [SerializeField] public CharacterData characterData; // Assigned at runtime
+    [SerializeField] private float moveSpeedModifier;
+    [SerializeField] private int currentHealth;
+    [SerializeField] private bool isAlive = true; // Indicates if the character is alive
 
-    private bool shouldMove = true; // Controls whether the character is moving
+    [Header("Attack Settings")]
+    [SerializeField] private MeleeDamage meleeDamage;
+    [SerializeField] private RangedAttackBehavior rangedAttack;
+    [SerializeField] private Vector3 attackSpawnPoint; // Point where projectiles spawn (if ranged)
+    [SerializeField] private LayerMask enemyLayerMask;
+    [SerializeField] private float attackCooldownTimer = 0;
+    [SerializeField] private GameObject targetGameObject;
+
+    [Header("Detection Settings")]
+    [SerializeField] private float characterDetectDistance;
+    [SerializeField] private LayerMask barracksLayerMask;
+
+    [Header("Component References")]
+    [SerializeField] private Animator animator;
+    [SerializeField] private BoxCollider2D boxCollider;
+    [SerializeField] private SpriteRenderer spriteRenderer;
+    [SerializeField] private Rigidbody2D rb;
+
+    [Header("Movement Settings")]
+    [SerializeField] private bool shouldMove = true; // Controls whether the character is moving
+
+    [Header("Events")]
+    [SerializeField] private string addingThisForHeaderToWork;
+    [SerializeField] private delegate void DeathEventHandler();
+    [SerializeField] private event DeathEventHandler onDeath;
+
+    private void Awake()
+    {
+        onDeath += FindAnyObjectByType<PartyGameplayController>().OnCharacterDeath;
+    }
 
     void Start()
     {
+        isAlive = true;
+
         spriteRenderer = GetComponent<SpriteRenderer>();
         boxCollider = GetComponent<BoxCollider2D>();
         animator = GetComponent<Animator>();
@@ -75,6 +98,7 @@ public class CharacterController : MonoBehaviour
                 rangedAttack.Attack(attackSpawnPoint, characterData.damage);
             } else {
                 animator.SetTrigger("Attack");
+                GetComponentInChildren<MeleeDamage>().ApplyDamage();
             }
             attackCooldownTimer = characterData.attackCooldown; // Reset cooldown
         }
@@ -97,7 +121,7 @@ public class CharacterController : MonoBehaviour
 
     private void FixedUpdate()
     {
-        if (shouldMove) {
+        if (shouldMove && isAlive) {
             // Move character based on its type
             if (characterData.isPlayerCharacter) {
                 rb.linearVelocity = Vector2.right * characterData.speed * moveSpeedModifier;
@@ -265,6 +289,11 @@ public class CharacterController : MonoBehaviour
 
     public void TakeDamage(int damage)
     {
+        if (gameObject.tag == "Enemy") {
+            SaveManager.Instance.gameData.coinTotal += 1;
+            Debug.Log("Added one coin for attacking.");
+        }
+
         currentHealth -= damage;
         animator.SetTrigger("Hurt");
         if (currentHealth <= 0) {
@@ -274,12 +303,13 @@ public class CharacterController : MonoBehaviour
 
     private void Die()
     {
+        isAlive = false;
+
+        if (gameObject.tag == "Player") {
+            onDeath?.Invoke();
+        }
+
         animator.SetTrigger("Die");
         Destroy(gameObject, 2f); // Delay destruction to allow death animation to play
-    }
-
-    public void Attack()
-    {
-        animator.SetTrigger("Attack");
     }
 }

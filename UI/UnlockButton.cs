@@ -31,8 +31,17 @@ public class UnlockButton : MonoBehaviour
         if (SaveManager.Instance != null) {
             CharacterManager characterManager = FindAnyObjectByType<CharacterManager>();
             if (characterManager != null) {
-                characterManager.UnlockCharacter(characterName);
-                SetButtonState(false); // Disable the button after unlocking
+                CharacterData character = GameManager.Instance.characterDatabase.GetCharacterByName(characterName);
+
+                if (SaveManager.Instance.gameData.coinTotal >= character.purchaseCost) {
+                    SaveManager.Instance.gameData.coinTotal -= character.purchaseCost;
+                    characterManager.UnlockCharacter(characterName);
+                    SetButtonState(false); // Disable the button after unlocking
+
+                    SaveManager.Instance.SaveGame();
+                }
+
+                Debug.Log("Broke bitch.");
             }
         }
     }

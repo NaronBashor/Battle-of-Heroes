@@ -3,14 +3,23 @@ using UnityEngine;
 
 public class RangedAttackBehavior : MonoBehaviour
 {
-    private Animator animator;
-    private GameObject projectilePrefab;
-    private Transform characterTransform;
-    private Vector2 spawnOffset;
-    private int damage;
-    private string characterName;
-    private GameObject characterParent;
-    private LayerMask targetLayerMask;
+    [Header("Animation Settings")]
+    [SerializeField] private Animator animator;
+
+    [Header("Projectile Settings")]
+    [SerializeField] private GameObject projectilePrefab;
+    [SerializeField] private Vector2 spawnOffset;
+
+    [Header("Character Transform")]
+    [SerializeField] private Transform characterTransform;
+
+    [Header("Character Details")]
+    [SerializeField] private string characterName;
+    [SerializeField] private GameObject characterParent;
+
+    [Header("Combat Settings")]
+    [SerializeField] private int damage;
+    [SerializeField] private LayerMask targetLayerMask;
 
     public void RangedAttackInfo(string characterName, Animator animator, GameObject projectilePrefab, Transform characterTransform, Vector2 spawnOffset, int damage, GameObject characterParent,
         LayerMask targetLayerMask)

@@ -20,7 +20,7 @@ public class SceneController : MonoBehaviour
             //case "Game":
             //    GameManager.Instance.SetGameState(GameManager.GameState.Game);
             //    break;
-            case "Level":
+            case "LevelSelect":
                 if (SaveManager.Instance.gameData.selectedParty.Count < 1) {
                     FindAnyObjectByType<SpotlightController>().OpenSpotlightPanel();
                     return;

@@ -4,11 +4,18 @@ using UnityEngine;
 [System.Serializable]
 public class GameData
 {
-    public List<CharacterSaveData> characters = new List<CharacterSaveData>();
-    public int coinTotal = 0;
-    public int playerLevel = 1;
-    public bool isPlayerCharacter;
-    public int barracksUpgradeIndex = 0;
+    [Header("Character Data")]
+    [SerializeField] public List<CharacterSaveData> characters = new List<CharacterSaveData>();
+
+    [Header("Player Stats")]
+    [SerializeField] public int coinTotal = 0;
+    [SerializeField] public int playerLevel = 1;
+
+    [Header("Player Settings")]
+    [SerializeField] private bool isPlayerCharacter;
+
+    [Header("Barracks Data")]
+    [SerializeField] public int barracksUpgradeIndex = 0;
 
     // Add a list to store the party
     public List<string> selectedParty = new List<string>();
@@ -18,7 +25,7 @@ public class GameData
     public float musicVolume = 1.0f;   // Default: max volume
 
     // New: Level and difficulty progress
-    public Dictionary<int, LevelProgress> levelProgress = new Dictionary<int, LevelProgress>();
+    public List<LevelProgressEntry> levelProgress = new List<LevelProgressEntry>(); // Use List for serialization compatibility
 
     public GameData(CharacterDatabase database)
     {
@@ -39,13 +46,37 @@ public class GameData
             characters.Add(new CharacterSaveData(character));
         }
 
-        // Initialize level progress
+        // Reset level progress
         levelProgress.Clear();
         for (int i = 0; i < 10; i++) // Assume 10 levels
         {
-            levelProgress[i] = new LevelProgress();
+            levelProgress.Add(new LevelProgressEntry {
+                levelIndex = i,
+                progress = new LevelProgress()
+            });
         }
     }
+
+    public LevelProgress GetLevelProgress(int levelIndex)
+    {
+        var entry = levelProgress.Find(x => x.levelIndex == levelIndex);
+        return entry?.progress;
+    }
+
+    public void SetLevelProgress(int levelIndex, LevelProgress progress)
+    {
+        var entry = levelProgress.Find(x => x.levelIndex == levelIndex);
+        if (entry != null) {
+            entry.progress = progress;
+        }
+    }
+}
+
+[System.Serializable]
+public class LevelProgressEntry
+{
+    public int levelIndex; // The index of the level
+    public LevelProgress progress; // Progress data for this level
 }
 
 [System.Serializable]
@@ -88,4 +119,5 @@ public class LevelProgress
     public bool easyCompleted = false;
     public bool mediumCompleted = false;
     public bool hardCompleted = false;
+    public int starsEarned = 0; // 0: Locked, 1: One star, 2: Two stars, 3: Three stars
 }

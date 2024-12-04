@@ -2,14 +2,18 @@ using UnityEngine;
 
 public class CoinManager : MonoBehaviour
 {
-    public int coinsPerInterval = 5;
-    public float incomeInterval = 10f;
-    private float timer;
+    [Header("Income Settings")]
+    [SerializeField] private int coinsPerInterval;
+    [SerializeField] private float incomeInterval;
+
+    [Header("Timer")]
+    [SerializeField] private float timer;
 
     private void Start()
     {
         LevelDifficulty levelDifficulty = GameManager.Instance.GetCurrentLevelDifficulty();
         coinsPerInterval = levelDifficulty.passiveCoinAmount;
+        incomeInterval = 10f;
     }
 
     private void Update()
@@ -25,7 +29,7 @@ public class CoinManager : MonoBehaviour
     private void GeneratePassiveCoins()
     {
         SaveManager.Instance.gameData.coinTotal += coinsPerInterval;
-        Debug.Log($"Passive coins earned: {coinsPerInterval}");
+        //Debug.Log($"Passive coins earned: {coinsPerInterval}");
     }
 
     public void SetPassiveIncome(int coinsPerInterval, float incomeInterval)

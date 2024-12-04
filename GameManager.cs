@@ -17,11 +17,20 @@ public class GameManager : MonoBehaviour
         Map
     }
 
-    public GameState state;
-    public CharacterDatabase characterDatabase;
-    private OptionsManager optionsManager;
-    public Difficulty currentDifficulty; // Tracks the selected difficulty
-    public LevelData currentLevel;      // Reference to the active level's data
+    [Header("Game State")]
+    [SerializeField] private GameState state;
+
+    [Header("Databases")]
+    [SerializeField] public CharacterDatabase characterDatabase;
+
+    [Header("Options")]
+    [SerializeField] private OptionsManager optionsManager;
+
+    [Header("Difficulty Settings")]
+    [SerializeField] private Difficulty currentDifficulty; // Tracks the selected difficulty
+
+    [Header("Level Data")]
+    [SerializeField] public LevelData currentLevel;
 
     private void Awake()
     {
@@ -42,7 +51,7 @@ public class GameManager : MonoBehaviour
 
     private void Update()
     {
-        if (Input.GetKeyDown(KeyCode.Escape)) {
+        if (Input.GetKeyDown(KeyCode.Escape) && optionsManager != null) {
             if (optionsManager.IsOptionsPanelOpen()) {
                 optionsManager.CloseOptionsPanel();
             } else {
@@ -66,6 +75,11 @@ public class GameManager : MonoBehaviour
     public void SetDifficulty(Difficulty difficulty)
     {
         currentDifficulty = difficulty;
+    }
+
+    public Difficulty GetDifficulty()
+    {
+        return currentDifficulty;
     }
 
     public LevelDifficulty GetCurrentLevelDifficulty()
