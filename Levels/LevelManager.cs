@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class LevelManager : MonoBehaviour
 {
@@ -7,6 +8,15 @@ public class LevelManager : MonoBehaviour
     public SpriteRenderer currentBackgroundImage;
     public LevelData[] levels;
     private LevelData currentLevel;
+
+    private void Awake()
+    {
+        if (Instance == null) {
+            Instance = this;
+        } else {
+            Destroy(gameObject);
+        }
+    }
 
     public void LoadLevel(int levelIndex)
     {
@@ -17,19 +27,34 @@ public class LevelManager : MonoBehaviour
 
         currentLevel = levels[levelIndex];
         ApplyLevelData();
+
+        // Log the selected difficulty
+        Debug.Log($"Loading level {currentLevel.levelName} at {GameManager.Instance.currentDifficulty} difficulty.");
+
+        GameManager.Instance.currentLevel = currentLevel;
+
+        GameManager.Instance.SetGameState(GameManager.GameState.Game);
+        SceneManager.LoadScene("Level");
     }
+
 
     private void ApplyLevelData()
     {
-        // Example: Change background color based on level
-        currentBackgroundImage.sprite = currentLevel.backgroundImage;
-
-        // Example: Spawn enemies or configure the level
-        Debug.Log($"Loading {currentLevel.levelName} with {currentLevel.enemiesCount} enemies and a max index of {currentLevel.maxEnemyIndex}.");
+        if (currentBackgroundImage != null) {
+            currentBackgroundImage.sprite = currentLevel.backgroundImage;
+        }
+        
+        Debug.Log($"Loaded {currentLevel.levelName} with {currentLevel.enemiesCount} enemies.");
     }
 
     public LevelData GetCurrentLevelData()
     {
         return currentLevel;
+    }
+
+    public void CompleteLevel()
+    {
+        SaveManager.Instance.UnlockNextDifficulty(currentLevel.levelIndex, GameManager.Instance.currentDifficulty);
+        Debug.Log($"Level {currentLevel.levelIndex} completed on {GameManager.Instance.currentDifficulty}. Next difficulty unlocked!");
     }
 }

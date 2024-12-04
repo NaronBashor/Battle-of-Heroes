@@ -1,5 +1,6 @@
 using UnityEngine;
 using System.IO;
+using System.Collections.Generic;
 
 public class SaveManager : MonoBehaviour
 {
@@ -22,7 +23,10 @@ public class SaveManager : MonoBehaviour
 
     private void Start()
     {
-        LoadGame();
+        if (gameData == null) {
+            Debug.LogWarning("Game data is null. Attempting to load or start a new game.");
+            LoadGame();
+        }
     }
 
     public bool SaveExists()
@@ -32,10 +36,23 @@ public class SaveManager : MonoBehaviour
 
     public void NewGame()
     {
-        gameData = new GameData(charDatabase); // Reset using defaults
+        gameData = new GameData(charDatabase); // Initialize `gameData` with defaults
+
+        // Initialize `levelProgress`
+        if (gameData.levelProgress == null) {
+            gameData.levelProgress = new Dictionary<int, LevelProgress>();
+        }
+
+        for (int i = 0; i < 10; i++) // Assume 10 levels
+        {
+            gameData.levelProgress[i] = new LevelProgress();
+        }
+
         SaveGame();
-        //Debug.Log("Game data reset to default values.");
     }
+
+
+
 
     public void DeleteSave()
     {
@@ -60,13 +77,76 @@ public class SaveManager : MonoBehaviour
     {
         if (File.Exists(saveFilePath)) {
             string json = File.ReadAllText(saveFilePath);
-            gameData = JsonUtility.FromJson<GameData>(json);
+
+            try {
+                gameData = JsonUtility.FromJson<GameData>(json);
+            } catch {
+                Debug.LogError("Failed to deserialize save file. Starting a new game.");
+                NewGame();
+                return;
+            }
+
+            if (gameData == null) {
+                Debug.LogWarning("Game data is null. Starting a new game.");
+                NewGame();
+                return;
+            }
+
+            // Ensure `levelProgress` is initialized
+            if (gameData.levelProgress == null) {
+                Debug.LogWarning("levelProgress is null. Initializing.");
+                gameData.levelProgress = new Dictionary<int, LevelProgress>();
+            }
+
+            // Populate missing levels
+            for (int i = 0; i < 10; i++) // Assume 10 levels
+            {
+                if (!gameData.levelProgress.ContainsKey(i)) {
+                    gameData.levelProgress[i] = new LevelProgress();
+                }
+            }
+
             RefreshAllButtons();
-            //Debug.Log("Game loaded!");
         } else {
-            //Debug.Log("No save file found. Starting fresh.");
-            SaveGame();
+            Debug.Log("Save file not found. Starting a new game.");
+            NewGame();
         }
+    }
+
+
+
+
+
+    public void UnlockNextDifficulty(int levelIndex, Difficulty completedDifficulty)
+    {
+        if (gameData.levelProgress == null) {
+            Debug.LogWarning("levelProgress is null. Initializing.");
+            gameData.levelProgress = new Dictionary<int, LevelProgress>();
+        }
+
+        if (!gameData.levelProgress.ContainsKey(levelIndex)) {
+            gameData.levelProgress[levelIndex] = new LevelProgress();
+        }
+
+        var progress = gameData.levelProgress[levelIndex];
+        if (completedDifficulty == Difficulty.Easy) progress.mediumCompleted = true;
+        if (completedDifficulty == Difficulty.Medium) progress.hardCompleted = true;
+
+        SaveGame();
+    }
+
+
+    public bool IsDifficultyUnlocked(int levelIndex, Difficulty difficulty)
+    {
+        if (!gameData.levelProgress.ContainsKey(levelIndex)) return false;
+
+        var progress = gameData.levelProgress[levelIndex];
+        return difficulty switch {
+            Difficulty.Easy => true,
+            Difficulty.Medium => progress.easyCompleted,
+            Difficulty.Hard => progress.mediumCompleted,
+            _ => false
+        };
     }
 
     public void RefreshAllButtons()

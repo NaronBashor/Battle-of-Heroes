@@ -20,6 +20,7 @@ public class CharacterData : ScriptableObject
     public int health;
     public int damage;
     public float speed;
+    public int armor;
     public int cost;
     public float yOffset;
 
@@ -36,4 +37,5 @@ public class CharacterData : ScriptableObject
     [Header("Level-Up Stats")]
     public int healthIncreasePerLevel;
     public int damageIncreasePerLevel;
+    public int attackSpeedIncreasePerLevel;
 }

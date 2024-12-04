@@ -17,6 +17,9 @@ public class GameData
     public bool isMusicEnabled = true; // Default: music is on
     public float musicVolume = 1.0f;   // Default: max volume
 
+    // New: Level and difficulty progress
+    public Dictionary<int, LevelProgress> levelProgress = new Dictionary<int, LevelProgress>();
+
     public GameData(CharacterDatabase database)
     {
         ResetGameData(database);
@@ -30,10 +33,17 @@ public class GameData
         barracksUpgradeIndex = 0;
         selectedParty.Clear();
 
-        // Reset characters using the defaults from CharacterDatabase
+        // Reset characters
         characters.Clear();
         foreach (var character in database.playerCharacters) {
             characters.Add(new CharacterSaveData(character));
+        }
+
+        // Initialize level progress
+        levelProgress.Clear();
+        for (int i = 0; i < 10; i++) // Assume 10 levels
+        {
+            levelProgress[i] = new LevelProgress();
         }
     }
 }
@@ -46,7 +56,6 @@ public class CharacterSaveData
     public bool isUnlocked;
     public int damage;
     public float attackCooldown;
-    public float attackSpeed;
     public float health;
 
     // Constructor to initialize from CharacterData
@@ -62,7 +71,6 @@ public class CharacterSaveData
         health = characterData.health;
         damage = characterData.damage;
         attackCooldown = characterData.attackCooldown;
-        attackSpeed = characterData.attackSpeed;
     }
 
     public void LevelUp(CharacterData data)
@@ -70,7 +78,14 @@ public class CharacterSaveData
         level++;
         health += data.healthIncreasePerLevel;
         damage += data.damageIncreasePerLevel;
-        attackSpeed += 0.1f;
-        attackCooldown = 1f / data.attackSpeed;
+        attackCooldown -= data.attackSpeedIncreasePerLevel;
     }
+}
+
+[System.Serializable]
+public class LevelProgress
+{
+    public bool easyCompleted = false;
+    public bool mediumCompleted = false;
+    public bool hardCompleted = false;
 }

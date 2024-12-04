@@ -13,7 +13,7 @@ public class Spawner : MonoBehaviour
     {
         ResetSortingOrderCounter();
         //TrySpawnPlayerCharacter();
-        TrySpawnEnemyCharacter();
+        //TrySpawnEnemyCharacter();
     }
 
     public void TrySpawnPlayerCharacter(string characterName)
@@ -32,10 +32,16 @@ public class Spawner : MonoBehaviour
         SpawnCharacter(data, playerSpawnPoint);
     }
 
-    private void TrySpawnEnemyCharacter()
+    public void TrySpawnEnemyCharacter(int maxEnemyIndex)
     {
-        int randomIndex = Random.Range(0, enemyDatabase.enemyCharacters.Count);
-        CharacterData data = enemyDatabase.enemyCharacters[randomIndex];
+        // Get the pool of enemies for the current level and difficulty
+        CharacterData[] enemyPool = GameManager.Instance.GetEnemyPool(GameManager.Instance.currentLevel.levelIndex);
+
+        // Select a random enemy from the pool
+        int randomIndex = Random.Range(0, enemyPool.Length); // Ensure within the pool size
+        CharacterData data = enemyPool[randomIndex];
+
+        // Spawn the selected enemy at the designated spawn point
         SpawnCharacter(data, enemySpawnPoint);
     }
 

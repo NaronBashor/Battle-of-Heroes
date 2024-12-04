@@ -195,7 +195,7 @@ public class PartyScreenController : MonoBehaviour
         healthText.text = characterSaveData.health.ToString("F0"); // Use updated damage
         attackTypeText.text = characterData.attackType.ToString();
         damageText.text = characterSaveData.damage.ToString("F0"); // Use updated damage
-        attackSpeedText.text = $"{characterSaveData.attackSpeed.ToString("F2")}/sec"; // Use updated attack speed
+        attackSpeedText.text = $"{characterSaveData.attackCooldown.ToString("F2")}/sec"; // Use updated attack speed
         moveSpeedText.text = characterData.speed.ToString("F0");
     }
 

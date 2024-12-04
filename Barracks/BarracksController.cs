@@ -11,8 +11,14 @@ public class BarracksController : MonoBehaviour
     public int health;
     private int startingHealth;
 
+    private bool isPlayerBarracks = false;
+    private bool isEnemyBarracks = false;
+
     private void Start()
     {
+        isPlayerBarracks = false;
+        isEnemyBarracks = false;
+
         if (barracksData == null || playerBarracks.GetComponent<SpriteRenderer>() == null) {
             Debug.LogError("BarracksData or SpriteRenderer is not assigned!");
             return;
@@ -20,9 +26,9 @@ public class BarracksController : MonoBehaviour
 
         // Determine if this is a player or enemy barracks based on tag
         if (CompareTag("PlayerBarracks")) {
-            //Debug.Log("This is the Player's Barracks.");
+            isPlayerBarracks = true;
         } else if (CompareTag("EnemyBarracks")) {
-            //Debug.Log("This is the Enemy's Barracks.");
+            isEnemyBarracks = true;
         } else {
             Debug.LogError("Barracks does not have a valid tag!");
         }
@@ -56,8 +62,12 @@ public class BarracksController : MonoBehaviour
         }
 
         // Check if the barracks are destroyed
-        if (health <= 0) {
-            Debug.Log("Barracks Destroyed, Game Over.");
+        if (health <= 0 && GameManager.Instance.GetCurrentGameState() == GameManager.GameState.Game) {
+            if (isPlayerBarracks) {
+                Debug.Log("Game Over.");
+            } else if (isEnemyBarracks) {
+                LevelManager.Instance.CompleteLevel();
+            }
         }
     }
 

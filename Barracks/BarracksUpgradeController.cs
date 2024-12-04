@@ -30,8 +30,6 @@ public class BarracksUpgradeController : MonoBehaviour
 
     private void Start()
     {
-        SaveManager.Instance.LoadGame();
-
         SaveManager.Instance.gameData.coinTotal = 100000; // REMOVE
 
         InitUnlockButton();
