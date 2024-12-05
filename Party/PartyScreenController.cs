@@ -26,6 +26,10 @@ public class PartyScreenController : MonoBehaviour
     [SerializeField] private TextMeshProUGUI damageText;
     [SerializeField] private TextMeshProUGUI attackSpeedText;
     [SerializeField] private TextMeshProUGUI moveSpeedText;
+    [SerializeField] private TextMeshProUGUI upgradeCostText;
+    [SerializeField] private TextMeshProUGUI upgradeHealthValueText;
+    [SerializeField] private TextMeshProUGUI upgradeDamageValueText;
+    [SerializeField] private TextMeshProUGUI upgradeAttackSpeedValueText;
 
     [Header("Character Details")]
     [SerializeField] private string characterName;
@@ -163,7 +167,7 @@ public class PartyScreenController : MonoBehaviour
                     //Debug.Log($"{characterName} leveled up to level {characterSaveData.level}!");
                 }
             } else {
-                Debug.Log("Not enough coins to level up!");
+                Debug.Log($"Need {cost} coins to purchase upgrade!");
             }
         } else {
             Debug.LogError($"Character {characterName} not found in GameData!");
@@ -206,6 +210,11 @@ public class PartyScreenController : MonoBehaviour
         damageText.text = characterSaveData.damage.ToString("F0"); // Use updated damage
         attackSpeedText.text = $"{characterSaveData.attackCooldown.ToString("F2")}/sec"; // Use updated attack speed
         moveSpeedText.text = characterData.speed.ToString("F0");
+
+        upgradeCostText.text = GetLevelUpCost(characterSaveData.level).ToString("F0");
+        upgradeHealthValueText.text = $"+{characterData.healthIncreasePerLevel.ToString("F0")}";
+        upgradeDamageValueText.text = $"+{characterData.damageIncreasePerLevel.ToString("F0")}";
+        upgradeAttackSpeedValueText.text = $"-{characterData.attackSpeedIncreasePerLevel.ToString("F2")}";
     }
 
     public void CloseLevelUpPanel()
@@ -227,7 +236,7 @@ public class PartyScreenController : MonoBehaviour
         }
 
         SaveManager.Instance.SaveGame(); // Save the updated game data
-        Debug.Log("Party saved!");
+        //Debug.Log("Party saved!");
     }
 
     public void OnDisable()

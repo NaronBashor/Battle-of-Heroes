@@ -57,6 +57,7 @@ public class Spawner : MonoBehaviour
     {
         Vector3 spawnPosition = spawnPoint.position + new Vector3(0, data.yOffset, 0);
         GameObject character = Instantiate(characterPrefab, spawnPosition, Quaternion.identity);
+        character.GetComponent<SpriteRenderer>().enabled = false;
         CharacterController controller = character.GetComponent<CharacterController>();
         controller.characterData = data;
         // Set the unique sorting order

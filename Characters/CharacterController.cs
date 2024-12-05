@@ -1,6 +1,6 @@
 using System;
 using System.Collections.Generic;
-using Unity.Collections;
+using System.Collections;
 using UnityEngine;
 using UnityEngine.UI;
 using static CharacterData;
@@ -42,6 +42,8 @@ public class CharacterController : MonoBehaviour
     private void Awake()
     {
         onDeath += FindAnyObjectByType<PartyGameplayController>().OnCharacterDeath;
+
+        StartCoroutine(SpriteRendererDelay());
     }
 
     void Start()
@@ -92,9 +94,9 @@ public class CharacterController : MonoBehaviour
     {
         attackCooldownTimer -= Time.deltaTime;
 
-        if (attackCooldownTimer <= 0 && IsEnemyInRange()) {
+        if (attackCooldownTimer <= 0 && IsEnemyInRange() && isAlive) {
             //attackBehavior.Attack(attackSpawnPoint, characterData.damage);
-            if (characterData.attackType == AttackType.Ranged) {
+            if (characterData.attackType == AttackType.Ranged && isAlive) {
                 rangedAttack.Attack(attackSpawnPoint, characterData.damage);
             } else {
                 animator.SetTrigger("Attack");
@@ -103,11 +105,18 @@ public class CharacterController : MonoBehaviour
             attackCooldownTimer = characterData.attackCooldown; // Reset cooldown
         }
 
-        if (characterData.isPlayerCharacter) {
+        if (characterData.isPlayerCharacter && isAlive) {
             shouldMove = !DetectEnemyCharacter() && !DetectBarracks();
         } else {
             shouldMove = !DetectPlayerCharacter() && !DetectBarracks();
         }
+    }
+
+    private IEnumerator SpriteRendererDelay()
+    {
+        yield return new WaitForSeconds(0.125f);
+
+        this.spriteRenderer.enabled = true;
     }
 
     private bool IsEnemyInRange()
@@ -185,9 +194,6 @@ public class CharacterController : MonoBehaviour
     private void InitializeCharacter()
     {
         currentHealth = characterData.health;
-
-        // Calculate attack cooldown based on attack speed
-        characterData.attackCooldown = 1f / characterData.attackSpeed;
 
         attackCooldownTimer = characterData.attackCooldown;
 
@@ -289,9 +295,9 @@ public class CharacterController : MonoBehaviour
 
     public void TakeDamage(int damage)
     {
-        if (gameObject.tag == "Enemy") {
+        if (gameObject.layer == LayerMask.NameToLayer("Enemy")) {
             SaveManager.Instance.gameData.coinTotal += 1;
-            Debug.Log("Added one coin for attacking.");
+            Debug.Log($"Added one coin for attacking {gameObject.layer}.");
         }
 
         currentHealth -= damage;
@@ -305,9 +311,15 @@ public class CharacterController : MonoBehaviour
     {
         isAlive = false;
 
-        if (gameObject.tag == "Player") {
+        if (gameObject.layer == LayerMask.NameToLayer("Player")) {
             onDeath?.Invoke();
         }
+
+        foreach(Transform child in transform) {
+            child.gameObject.SetActive(false);
+        }
+
+        boxCollider.enabled = false;
 
         animator.SetTrigger("Die");
         Destroy(gameObject, 2f); // Delay destruction to allow death animation to play

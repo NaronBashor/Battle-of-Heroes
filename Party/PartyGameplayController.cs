@@ -1,11 +1,18 @@
 using UnityEngine;
 using UnityEngine.UI;
 using System.Collections.Generic;
+using TMPro;
+using static System.Net.Mime.MediaTypeNames;
 
 public class PartyGameplayController : MonoBehaviour
 {
     [Header("UI Buttons")]
     [SerializeField] private List<Button> gameplayButtons; // Assign 6 buttons for the party
+    [SerializeField] private List<TextMeshProUGUI> characterCostText;
+    [SerializeField] private List<GameObject> characterCostImage;
+
+    [Header("Cooldown UI Overlays")]
+    [SerializeField] private List<UnityEngine.UI.Image> cooldownOverlays; // Assign the radial fill images for each button
 
     [Header("UI Sprites")]
     [SerializeField] private Sprite emptySlotSprite; // Sprite for empty slots
@@ -28,7 +35,9 @@ public class PartyGameplayController : MonoBehaviour
 
         for (int i = 0; i < gameplayButtons.Count; i++) {
             Button button = gameplayButtons[i];
-            Image buttonImage = button.GetComponent<Image>();
+            GameObject image = characterCostImage[i];
+            TextMeshProUGUI text = characterCostText[i];
+            UnityEngine.UI.Image buttonImage = button.GetComponent<UnityEngine.UI.Image>();
 
             if (i < party.Count) {
                 // Set the button sprite and enable it
@@ -38,6 +47,8 @@ public class PartyGameplayController : MonoBehaviour
                 if (characterData != null) {
                     buttonImage.sprite = characterData.characterButtonSprite;
                     button.interactable = true;
+                    image.SetActive(true);
+                    text.text = characterData.spawnCost.ToString();
 
                     // Assign button click event to spawn character
                     button.onClick.RemoveAllListeners();
@@ -46,6 +57,7 @@ public class PartyGameplayController : MonoBehaviour
             } else {
                 // Empty slot for unused party members
                 buttonImage.sprite = emptySlotSprite;
+                image.SetActive(false);
                 button.interactable = false;
                 button.onClick.RemoveAllListeners();
             }
@@ -111,18 +123,34 @@ public class PartyGameplayController : MonoBehaviour
 
         for (int i = 0; i < gameplayButtons.Count; i++) {
             Button button = gameplayButtons[i];
+            UnityEngine.UI.Image cooldownOverlay = cooldownOverlays[i];
+            GameObject image = characterCostImage[i];
+            TextMeshProUGUI text = characterCostText[i];
 
             if (i < party.Count) {
                 string characterName = party[i];
                 CharacterData characterData = FindAnyObjectByType<Spawner>().playerDatabase.GetCharacterByName(characterName);
 
                 if (characterData != null) {
-                    // Enable button only if off cooldown and coins are sufficient
-                    bool isOffCooldown = !cooldownTimers.ContainsKey(characterName) || Time.time >= cooldownTimers[characterName];
-                    bool hasEnoughCoins = SaveManager.Instance.gameData.coinTotal >= characterData.spawnCost;
+                    bool isOnCooldown = cooldownTimers.ContainsKey(characterName) &&
+                                        Time.time < cooldownTimers[characterName];
 
-                    button.interactable = isOffCooldown && hasEnoughCoins && currentActiveCharacters < maxActiveCharacters;
+                    button.interactable = !isOnCooldown;
+                    button.interactable = !isOnCooldown;
+                    image.SetActive(!isOnCooldown);
+                    text.text = characterData.spawnCost.ToString();
+
+                    if (isOnCooldown) {
+                        float remainingTime = cooldownTimers[characterName] - Time.time;
+                        cooldownOverlay.fillAmount = remainingTime / characterData.spawnCooldown;
+                    } else {
+                        cooldownOverlay.fillAmount = 0; // No overlay when off cooldown
+                    }
                 }
+            } else {
+                image.SetActive(false);
+                button.interactable = false;
+                if (cooldownOverlay != null) cooldownOverlay.fillAmount = 0;
             }
         }
     }

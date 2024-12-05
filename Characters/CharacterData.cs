@@ -29,7 +29,6 @@ public class CharacterData : ScriptableObject
     [Header("Attack Stats")]
     public float attackRange;
     public float attackCooldown; // Time in seconds between attacks
-    public float attackSpeed; // New stat: Number of attacks per second
 
     // Attack behavior
     public AttackType attackType; // Melee or Ranged

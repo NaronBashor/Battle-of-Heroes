@@ -5,6 +5,7 @@ public class UnlockButton : MonoBehaviour
 {
     public string characterName; // Name of the character this button unlocks
     public Button unlockButton;  // The button component
+    public GameObject coinContainer;
 
     private void Start()
     {
@@ -40,7 +41,6 @@ public class UnlockButton : MonoBehaviour
 
                     SaveManager.Instance.SaveGame();
                 }
-
                 Debug.Log("Broke bitch.");
             }
         }
@@ -49,5 +49,6 @@ public class UnlockButton : MonoBehaviour
     private void SetButtonState(bool interactable)
     {
         unlockButton.interactable = interactable;
+        coinContainer.SetActive(interactable);
     }
 }
