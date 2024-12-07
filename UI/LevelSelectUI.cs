@@ -10,12 +10,20 @@ public class LevelSelectionUI : MonoBehaviour
     [SerializeField] private Button easyButton;
     [SerializeField] private Button mediumButton;
     [SerializeField] private Button hardButton;
+    [SerializeField] private Button closeButton;
 
     [Header("Level Buttons")]
     [SerializeField] private LevelButton[] levelButtons; // Array of all level buttons in the UI
 
     [Header("Level Selection")]
     [SerializeField] private int selectedLevelIndex;
+
+    private void Awake()
+    {
+        if (Time.timeScale != 1) {
+            Time.timeScale = 1;
+        }
+    }
 
     private void Start()
     {
@@ -25,6 +33,7 @@ public class LevelSelectionUI : MonoBehaviour
         easyButton.onClick.AddListener(() => SelectDifficulty(Difficulty.Easy));
         mediumButton.onClick.AddListener(() => SelectDifficulty(Difficulty.Medium));
         hardButton.onClick.AddListener(() => SelectDifficulty(Difficulty.Hard));
+        closeButton.onClick.AddListener(() => OnDifficultyPanelClosed());
 
         // Initialize all level buttons
         UpdateAllLevelButtons();
@@ -32,6 +41,7 @@ public class LevelSelectionUI : MonoBehaviour
 
     public void OnLevelButtonClicked(int levelIndex)
     {
+        AudioManager.Instance.PlaySFX("Button Click");
         selectedLevelIndex = levelIndex;
         difficultyPanel.SetActive(true);
 
@@ -41,8 +51,14 @@ public class LevelSelectionUI : MonoBehaviour
         hardButton.interactable = SaveManager.Instance.IsDifficultyUnlocked(levelIndex, Difficulty.Hard);
     }
 
+    public void OnDifficultyPanelClosed()
+    {
+        difficultyPanel.SetActive(false);
+    }
+
     private void SelectDifficulty(Difficulty difficulty)
     {
+        AudioManager.Instance.PlaySFX("Button Click");
         difficultyPanel.SetActive(false);
 
         // Set the selected difficulty in the GameManager

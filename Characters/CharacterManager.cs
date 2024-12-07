@@ -8,6 +8,7 @@ public class CharacterManager : MonoBehaviour
 
     public void UnlockCharacter(string characterName)
     {
+        AudioManager.Instance.PlaySFX("Button Click");
         var character = SaveManager.Instance.gameData.characters.FirstOrDefault(c => c.characterName == characterName);
         if (character != null) {
             character.isUnlocked = true;

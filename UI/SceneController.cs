@@ -7,6 +7,7 @@ public class SceneController : MonoBehaviour
 
     public void ChangeScene(string sceneName)
     {
+        AudioManager.Instance.PlaySFX("Button Click");
         switch (sceneName) {
             case "Shop":
                 GameManager.Instance.SetGameState(GameManager.GameState.Shop);
@@ -22,7 +23,7 @@ public class SceneController : MonoBehaviour
             //    break;
             case "LevelSelect":
                 if (SaveManager.Instance.gameData.selectedParty.Count < 1) {
-                    FindAnyObjectByType<SpotlightController>().OpenSpotlightPanel();
+                    //FindAnyObjectByType<SpotlightController>().OpenSpotlightPanel();
                     return;
                 }
                 GameManager.Instance.SetGameState(GameManager.GameState.Game);

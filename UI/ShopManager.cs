@@ -29,6 +29,13 @@ public class ShopManager : MonoBehaviour
         "Zeus the Stormcaller"
         };
 
+    private void Awake()
+    {
+        if (Time.timeScale != 1) {
+            Time.timeScale = 1;
+        }
+    }
+
     private void Start()
     {
         PopulateCharacterInfo("Red-haired Paladin");
@@ -53,7 +60,24 @@ public class ShopManager : MonoBehaviour
         characterHealthText.text = character.health.ToString();
         characterAttackTypeText.text = character.attackType.ToString();
         characterDamageText.text = character.damage.ToString();
-        characterAttackSpeedText.text = character.attackCooldown.ToString();
+        characterAttackSpeedText.text = character.attackCooldown.ToString("F2");
+        characterMoveSpeedText.text = character.speed.ToString();
+    }
+
+    public void PopulateCharacterInfoWithSound(string characterName)
+    {
+        AudioManager.Instance.PlaySFX("Button Click");
+
+        AudioManager.Instance.PlaySFX("Button Click");
+        CharacterData character = characterDatabase.GetCharacterByName(characterName);
+
+        characterNameText.text = character.characterName;
+        characterDescriptionText.text = character.characterDescription;
+        characterLoreText.text = character.characterLore;
+        characterHealthText.text = character.health.ToString();
+        characterAttackTypeText.text = character.attackType.ToString();
+        characterDamageText.text = character.damage.ToString();
+        characterAttackSpeedText.text = character.attackCooldown.ToString("F2");
         characterMoveSpeedText.text = character.speed.ToString();
     }
 }

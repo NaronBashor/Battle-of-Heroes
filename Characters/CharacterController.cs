@@ -295,9 +295,12 @@ public class CharacterController : MonoBehaviour
 
     public void TakeDamage(int damage)
     {
+        Hurt();
+
         if (gameObject.layer == LayerMask.NameToLayer("Enemy")) {
             SaveManager.Instance.gameData.coinTotal += 1;
-            Debug.Log($"Added one coin for attacking {gameObject.layer}.");
+            FindAnyObjectByType<LevelUI>().SpawnCoinPrefabUI(1);
+            //Debug.Log($"Added one coin for attacking {gameObject.layer}.");
         }
 
         currentHealth -= damage;
@@ -315,6 +318,8 @@ public class CharacterController : MonoBehaviour
             onDeath?.Invoke();
         }
 
+        FindAnyObjectByType<PartyGameplayController>().UpdatePartySizeText();
+
         foreach(Transform child in transform) {
             child.gameObject.SetActive(false);
         }
@@ -323,5 +328,50 @@ public class CharacterController : MonoBehaviour
 
         animator.SetTrigger("Die");
         Destroy(gameObject, 2f); // Delay destruction to allow death animation to play
+    }
+
+    public void SwordSwingNoise()
+    {
+        AudioManager.Instance.PlaySFX("Sword Swing");
+    }
+
+    public void LoudGroundSmashNoise()
+    {
+        AudioManager.Instance.PlaySFX("Ground Smash");
+    }
+
+    public void ShootArrowNoise()
+    {
+        AudioManager.Instance.PlaySFX("Arrow Release");
+    }
+
+    public void BoltThrowNoise()
+    {
+        AudioManager.Instance.PlaySFX("Bolt Throw");
+    }
+
+    public void PoisonAttackNoise()
+    {
+        AudioManager.Instance.PlaySFX("Poison Attack");
+    }
+
+    public void ShamanNoise()
+    {
+        AudioManager.Instance.PlaySFX("Shaman");
+    }
+
+    public void BomberNoise()
+    {
+        AudioManager.Instance.PlaySFX("Bomber");
+    }
+
+    public void CannonballNoise()
+    {
+        AudioManager.Instance.PlaySFX("Cannonball");
+    }
+
+    public void Hurt()
+    {
+        AudioManager.Instance.PlaySFX("Hurt");
     }
 }

@@ -21,7 +21,7 @@ public class CameraControls : MonoBehaviour
 
     private void Awake()
     {
-        returnToPlayerBarracksButton.GetComponentInChildren<Button>().onClick.AddListener(() => { ReturnToPlayerBarracksPostiion(); });
+        returnToPlayerBarracksButton.GetComponentInChildren<Button>().onClick.AddListener(() => { ReturnToPlayerBarracksPostition(); });
     }
 
     private void Start()
@@ -79,8 +79,9 @@ public class CameraControls : MonoBehaviour
         return cam.transform.position.x > -30f;
     }
 
-    private void ReturnToPlayerBarracksPostiion()
+    private void ReturnToPlayerBarracksPostition()
     {
+        AudioManager.Instance.PlaySFX("Button Click");
         cam.transform.position = new Vector3(minBounds.x, 0, -10);
     }
 }

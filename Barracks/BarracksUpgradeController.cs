@@ -76,6 +76,7 @@ public class BarracksUpgradeController : MonoBehaviour
 
     private void LevelUpBarracks()
     {
+        AudioManager.Instance.PlaySFX("Button Click");
         int cost = GetLevelUpCost(level);
         if (SaveManager.Instance.gameData.coinTotal >= cost) {
             SaveManager.Instance.gameData.coinTotal -= cost;
@@ -123,11 +124,13 @@ public class BarracksUpgradeController : MonoBehaviour
 
     private void OnOpenBarracksPanel()
     {
+        AudioManager.Instance.PlaySFX("Button Click");
         upgradeBarracksPanel.SetActive(true);
     }
 
     private void OnCloseBarracksPanel()
     {
+        AudioManager.Instance.PlaySFX("Button Click");
         upgradeBarracksPanel.SetActive(false);
     }
 }

@@ -53,6 +53,8 @@ public class BarracksController : MonoBehaviour
 
     public void TakeDamage(int damage)
     {
+        AudioManager.Instance.PlaySFX("Hit Barracks");
+
         // Reduce current health by the damage amount
         health -= damage;
         fillImage.fillAmount = (float)health / startingHealth;
@@ -78,7 +80,6 @@ public class BarracksController : MonoBehaviour
             if (isPlayerBarracks) {
                 Debug.Log("Game Over.");
             } else if (isEnemyBarracks) {
-                Debug.Log("Player wins!");
                 LevelManager.Instance.CompleteLevel();
             }
         }

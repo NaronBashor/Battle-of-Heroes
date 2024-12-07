@@ -29,6 +29,7 @@ public class UnlockButton : MonoBehaviour
 
     private void UnlockCharacter()
     {
+        AudioManager.Instance.PlaySFX("Button Click");
         if (SaveManager.Instance != null) {
             CharacterManager characterManager = FindAnyObjectByType<CharacterManager>();
             if (characterManager != null) {
@@ -41,7 +42,7 @@ public class UnlockButton : MonoBehaviour
 
                     SaveManager.Instance.SaveGame();
                 }
-                Debug.Log("Broke bitch.");
+                //Debug.Log("Broke bitch.");
             }
         }
     }

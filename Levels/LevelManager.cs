@@ -1,3 +1,4 @@
+using TMPro;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -12,6 +13,7 @@ public class LevelManager : MonoBehaviour
 
     [Header("UI Components")]
     [SerializeField] private SpriteRenderer currentBackgroundImage;
+    [SerializeField] private LevelUI currentUI;
 
     private void Awake()
     {
@@ -20,6 +22,11 @@ public class LevelManager : MonoBehaviour
         } else {
             Destroy(gameObject);
         }
+    }
+
+    private void Start()
+    {
+        currentUI = FindAnyObjectByType<LevelUI>();
     }
 
     public void LoadLevel(int levelIndex)
@@ -85,8 +92,16 @@ public class LevelManager : MonoBehaviour
             SaveManager.Instance.gameData.SetLevelProgress(nextLevelIndex, nextLevelProgress);
         }
 
+        currentUI.OpenLevelCompletePanel(thisCurrentLevel.levelIndex, thisDifficulty);
+        AudioManager.Instance.PlaySFX("Level Complete");
+
         // Save the updated progress
         SaveManager.Instance.SaveGame();
     }
 
+    public void GameOver()
+    {
+        AudioManager.Instance.PlaySFX("Game Over");
+        currentUI.OpenGameOverPanel();
+    }
 }

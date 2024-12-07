@@ -1,4 +1,6 @@
+using System;
 using System.Collections.Generic;
+using System.IO;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -32,6 +34,9 @@ public class GameManager : MonoBehaviour
     [Header("Level Data")]
     [SerializeField] public LevelData currentLevel;
 
+    [Header("Trial Content")]
+    [SerializeField] private GameObject trialExpiredPrefab;
+
     private void Awake()
     {
         if (Instance == null) {
@@ -40,8 +45,6 @@ public class GameManager : MonoBehaviour
         } else {
             Destroy(gameObject);
         }
-
-        SetGameState(GameState.MainMenu);
     }
 
     private void Start()
@@ -52,10 +55,13 @@ public class GameManager : MonoBehaviour
     private void Update()
     {
         if (Input.GetKeyDown(KeyCode.Escape) && optionsManager != null) {
-            if (optionsManager.IsOptionsPanelOpen()) {
+            if (optionsManager.optionsPanel.activeInHierarchy) {
                 optionsManager.CloseOptionsPanel();
-            } else {
-                optionsManager.OpenOptionsPanel();
+            }
+        } else if (optionsManager == null) {
+            optionsManager = FindAnyObjectByType<OptionsManager>();
+            if (optionsManager != null) {
+                optionsManager.CloseOptionsPanel();
             }
         }
     }
@@ -118,5 +124,23 @@ public class GameManager : MonoBehaviour
             default:
                 return new CharacterData[0];
         }
+    }
+
+    public void OpenTrialExpiredPanel()
+    {
+        Canvas canvas = FindAnyObjectByType<Canvas>();
+        GameObject trialGO = Instantiate(trialExpiredPrefab);
+
+        // Set the parent of the instantiated GameObject
+        trialGO.transform.SetParent(GameObject.Find("Canvas").transform);
+
+        // Reset the RectTransform to align with the parent
+        RectTransform rectTransform = trialGO.GetComponent<RectTransform>();
+        rectTransform.anchoredPosition = Vector2.zero; // Center the object
+        rectTransform.localScale = Vector3.one;       // Reset scale in case it's modified
+        rectTransform.localRotation = Quaternion.identity; // Reset rotation
+
+        // Ensure it's on top of other UI elements
+        trialGO.transform.SetAsLastSibling();
     }
 }

@@ -14,6 +14,9 @@ public class PartyGameplayController : MonoBehaviour
     [Header("Cooldown UI Overlays")]
     [SerializeField] private List<UnityEngine.UI.Image> cooldownOverlays; // Assign the radial fill images for each button
 
+    [Header("Text Components")]
+    [SerializeField] private TextMeshProUGUI partySizeText;
+
     [Header("UI Sprites")]
     [SerializeField] private Sprite emptySlotSprite; // Sprite for empty slots
 
@@ -24,9 +27,18 @@ public class PartyGameplayController : MonoBehaviour
     [Header("Cooldown Timers")]
     [SerializeField] private Dictionary<string, float> cooldownTimers = new Dictionary<string, float>(); // Cooldown timers for characters
 
+    private void Awake()
+    {
+        if (Time.timeScale != 1) {
+            Time.timeScale = 1;
+        }
+    }
+
     private void Start()
     {
         LoadParty(); // Initialize party buttons
+
+        UpdatePartySizeText();
     }
 
     private void LoadParty()
@@ -96,13 +108,21 @@ public class PartyGameplayController : MonoBehaviour
         SaveManager.Instance.gameData.coinTotal -= characterData.spawnCost;
         SaveManager.Instance.SaveGame(); // Save updated coin count
 
+        AudioManager.Instance.PlaySFX("Button Click");
         FindAnyObjectByType<Spawner>().TrySpawnPlayerCharacter(characterName);
         currentActiveCharacters++;
+
+        UpdatePartySizeText();
 
         // Apply cooldown
         cooldownTimers[characterName] = Time.time + characterData.spawnCooldown;
 
-        Debug.Log($"{characterName} spawned! Remaining coins: {SaveManager.Instance.gameData.coinTotal}");
+        //Debug.Log($"{characterName} spawned! Remaining coins: {SaveManager.Instance.gameData.coinTotal}");
+    }
+
+    public void UpdatePartySizeText()
+    {
+        partySizeText.text = $"{currentActiveCharacters} / {maxActiveCharacters}";
     }
 
     public void OnCharacterDeath()

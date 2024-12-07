@@ -12,7 +12,7 @@ public class GameData
     [SerializeField] public int playerLevel = 1;
 
     [Header("Player Settings")]
-    [SerializeField] private bool isPlayerCharacter;
+    [SerializeField] public bool isTutorialCompleted = false;
 
     [Header("Barracks Data")]
     [SerializeField] public int barracksUpgradeIndex = 0;

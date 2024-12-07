@@ -92,6 +92,7 @@ public class PartyScreenController : MonoBehaviour
 
     public void OnCharacterSelected(string characterName, Sprite characterSprite)
     {
+        AudioManager.Instance.PlaySFX("Button Click");
         if (selectedParty.Count < maxPartySize) {
             // Add character to the party
             selectedParty.Add((characterName, characterSprite));
@@ -106,6 +107,7 @@ public class PartyScreenController : MonoBehaviour
 
     public void OnPartySlotClicked(int slotIndex)
     {
+        AudioManager.Instance.PlaySFX("Button Click");
         if (slotIndex < selectedParty.Count) {
             // Remove the character from the party
             var removedCharacter = selectedParty[slotIndex];
@@ -147,6 +149,7 @@ public class PartyScreenController : MonoBehaviour
 
     public void OnLevelUpClicked()
     {
+        AudioManager.Instance.PlaySFX("Button Click");
         // Get the character's saved data
         var characterSaveData = SaveManager.Instance.gameData.characters.Find(c => c.characterName == characterName);
 
@@ -179,6 +182,7 @@ public class PartyScreenController : MonoBehaviour
 
     public void OpenLevelUpPanel(string characterName)
     {
+        AudioManager.Instance.PlaySFX("Button Click");
         this.characterName = characterName;
         levelUpPanel.SetActive(true);
 
@@ -219,6 +223,7 @@ public class PartyScreenController : MonoBehaviour
 
     public void CloseLevelUpPanel()
     {
+        AudioManager.Instance.PlaySFX("Button Click");
         levelUpPanel.SetActive(false);
     }
 

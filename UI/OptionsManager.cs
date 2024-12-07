@@ -10,7 +10,7 @@ public class OptionsManager : MonoBehaviour
     [SerializeField] private Slider volumeSlider;
 
     [Header("Options Panel")]
-    [SerializeField] private GameObject optionsPanel;
+    [SerializeField] public GameObject optionsPanel;
     [SerializeField] private Button openOptionsPanelButton;
     [SerializeField] private Button closeOptionsPanelButton;
 
@@ -70,6 +70,10 @@ public class OptionsManager : MonoBehaviour
         // Add listeners for changes
         musicToggle.onValueChanged.AddListener(OnMusicToggleChanged);
         volumeSlider.onValueChanged.AddListener(OnVolumeSliderChanged);
+
+        AudioManager.Instance.SetMusicVolume(volumeSlider.value);
+        AudioManager.Instance.musicSource.mute = !musicToggle.isOn;
+        AudioManager.Instance.sfxSource.mute = !musicToggle.isOn;
     }
 
     private void Update()
@@ -77,18 +81,15 @@ public class OptionsManager : MonoBehaviour
         currentCoinCountText.text = SaveManager.Instance.gameData.coinTotal.ToString();
     }
 
-    public bool IsOptionsPanelOpen()
-    {
-        return optionsPanel.activeInHierarchy;
-    }
-
     private void LoadMainMenu()
     {
+        AudioManager.Instance.PlayMenuMusic();
         SceneManager.LoadScene("MainMenu");
     }
 
     public void OpenOptionsPanel()
     {
+        AudioManager.Instance.PlaySFX("Button Click");
         Time.timeScale = 0f;
         openOptionsPanelButton.image.sprite = inactiveSprite;
         optionsPanel.SetActive(true);
@@ -99,6 +100,7 @@ public class OptionsManager : MonoBehaviour
         Time.timeScale = 1f;
         openOptionsPanelButton.image.sprite = activeSprite;
         optionsPanel.SetActive(false);
+        SaveManager.Instance.SaveGame();
     }
 
     private void OnMusicToggleChanged(bool isEnabled)
@@ -110,6 +112,7 @@ public class OptionsManager : MonoBehaviour
 
         // Enable or disable music in the game
         AudioListener.pause = !isEnabled;
+        //Debug.Log("Sound Enabled: " + isEnabled);
     }
 
     private void OnVolumeSliderChanged(float volume)
@@ -121,6 +124,7 @@ public class OptionsManager : MonoBehaviour
 
         // Update audio volume
         AudioListener.volume = volume;
+        //Debug.Log("Sound Enabled: " + volume);
     }
 
     private void OnCreditsButtonPressed()

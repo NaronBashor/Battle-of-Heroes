@@ -33,6 +33,7 @@ public class MainMenuManager : MonoBehaviour
 
     private void CreateNewGame()
     {
+        AudioManager.Instance.PlaySFX("Button Click");
         SaveManager.Instance.DeleteSave();
         SceneManager.LoadScene("Heroes");
 
@@ -41,6 +42,7 @@ public class MainMenuManager : MonoBehaviour
 
     private void ContinueSaveGame()
     {
+        AudioManager.Instance.PlaySFX("Button Click");
         SaveManager.Instance.LoadGame();
         SceneManager.LoadScene("Heroes");
 
@@ -49,6 +51,7 @@ public class MainMenuManager : MonoBehaviour
 
     private void OnExitButtonPressed()
     {
+        AudioManager.Instance.PlaySFX("Button Click");
         Application.Quit();
     }
 }

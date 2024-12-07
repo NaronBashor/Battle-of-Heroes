@@ -1,6 +1,8 @@
 using UnityEngine;
 using System.IO;
 using System.Collections.Generic;
+using System.Security.Cryptography;
+using System.Text;
 
 public class SaveManager : MonoBehaviour
 {
@@ -13,6 +15,9 @@ public class SaveManager : MonoBehaviour
 
     [Header("File Settings")]
     [SerializeField] private string saveFilePath;
+
+    // Encryption Key (must be 32 bytes for AES-256)
+    private readonly string encryptionKey = "4fa9e2d7bcaebf5d8dc4a9e647b62f46";
 
     private void Awake()
     {
@@ -35,12 +40,15 @@ public class SaveManager : MonoBehaviour
 
     public bool SaveExists()
     {
+        Debug.Log("Save exists: " + File.Exists(saveFilePath));
         return File.Exists(saveFilePath);
     }
 
     public void NewGame()
     {
         gameData = new GameData(charDatabase); // Initialize `gameData` with defaults
+
+        ResetTutorial();
 
         foreach (var entry in gameData.levelProgress) {
             entry.progress.starsEarned = 0; // Lock all levels
@@ -51,7 +59,6 @@ public class SaveManager : MonoBehaviour
 
         SaveGame();
     }
-
 
     public void DeleteSave()
     {
@@ -67,20 +74,26 @@ public class SaveManager : MonoBehaviour
     public void SaveGame()
     {
         string json = JsonUtility.ToJson(gameData, true);
-        File.WriteAllText(saveFilePath, json);
+
+        // Encrypt the JSON data
+        string encryptedJson = Encrypt(json);
+
+        File.WriteAllText(saveFilePath, encryptedJson);
         RefreshAllButtons();
-        //Debug.Log("Game saved!");
     }
 
     public void LoadGame()
     {
         if (File.Exists(saveFilePath)) {
-            string json = File.ReadAllText(saveFilePath);
+            string encryptedJson = File.ReadAllText(saveFilePath);
 
             try {
+                // Decrypt the JSON data
+                string json = Decrypt(encryptedJson);
+
                 gameData = JsonUtility.FromJson<GameData>(json);
             } catch {
-                Debug.LogError("Failed to deserialize save file. Starting a new game.");
+                Debug.LogError("Failed to decrypt or deserialize save file. Starting a new game.");
                 NewGame();
                 return;
             }
@@ -91,12 +104,6 @@ public class SaveManager : MonoBehaviour
                 return;
             }
 
-            // Ensure `levelProgress` is initialized
-            if (gameData.levelProgress == null || gameData.levelProgress.Count == 0) {
-                Debug.LogWarning("levelProgress is null or empty. Initializing.");
-                gameData.ResetGameData(charDatabase);
-            }
-
             RefreshAllButtons();
         } else {
             Debug.Log("Save file not found. Starting a new game.");
@@ -104,6 +111,38 @@ public class SaveManager : MonoBehaviour
         }
     }
 
+    private string Encrypt(string plainText)
+    {
+        using (Aes aes = Aes.Create()) {
+            aes.Key = Encoding.UTF8.GetBytes(encryptionKey);
+            aes.IV = new byte[16]; // Initialization vector (default all-zero for simplicity)
+
+            using (MemoryStream ms = new MemoryStream()) {
+                using (CryptoStream cs = new CryptoStream(ms, aes.CreateEncryptor(), CryptoStreamMode.Write)) {
+                    using (StreamWriter sw = new StreamWriter(cs)) {
+                        sw.Write(plainText);
+                    }
+                }
+                return System.Convert.ToBase64String(ms.ToArray());
+            }
+        }
+    }
+
+    private string Decrypt(string encryptedText)
+    {
+        using (Aes aes = Aes.Create()) {
+            aes.Key = Encoding.UTF8.GetBytes(encryptionKey);
+            aes.IV = new byte[16]; // Initialization vector (default all-zero for simplicity)
+
+            using (MemoryStream ms = new MemoryStream(System.Convert.FromBase64String(encryptedText))) {
+                using (CryptoStream cs = new CryptoStream(ms, aes.CreateDecryptor(), CryptoStreamMode.Read)) {
+                    using (StreamReader sr = new StreamReader(cs)) {
+                        return sr.ReadToEnd();
+                    }
+                }
+            }
+        }
+    }
 
     public void UnlockNextDifficulty(int levelIndex, Difficulty completedDifficulty)
     {
@@ -124,11 +163,6 @@ public class SaveManager : MonoBehaviour
         Debug.Log($"UnlockNextDifficulty: Level {levelIndex}, Completed {completedDifficulty}");
         Debug.Log($"mediumCompleted = {currentLevelProgress.mediumCompleted}, hardCompleted = {currentLevelProgress.hardCompleted}");
     }
-
-
-
-
-
 
     public void UnlockNextLevel(int completedLevelIndex, int starsEarned)
     {
@@ -152,9 +186,6 @@ public class SaveManager : MonoBehaviour
         SaveGame();
     }
 
-
-
-
     public bool IsDifficultyUnlocked(int levelIndex, Difficulty difficulty)
     {
         var progress = gameData.GetLevelProgress(levelIndex);
@@ -168,10 +199,23 @@ public class SaveManager : MonoBehaviour
         };
     }
 
+    public void CompleteTutorial()
+    {
+        if (gameData != null) {
+            gameData.isTutorialCompleted = true;
+            SaveGame(); // Save the updated game data
+            Debug.Log("Tutorial completed and saved.");
+        }
+    }
 
-
-
-
+    public void ResetTutorial()
+    {
+        if (gameData != null) {
+            gameData.isTutorialCompleted = false;
+            SaveGame();
+            Debug.Log("Tutorial reset.");
+        }
+    }
 
     public void RefreshAllButtons()
     {
